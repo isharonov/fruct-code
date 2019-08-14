@@ -112,6 +112,21 @@ html, body {
 	background-color: black;
 }
 
+.info-block {
+	font-size: 120%;
+}
+.info-block .badge {
+	font-size: 80%;
+	margin-right: 3%;
+}
+textarea.form-control {
+	height: 200px;
+}
+
+.table>tbody>tr>td.vert-align {
+	vertical-align: middle;
+}
+
 footer {
 	color: #666;
 	background: #222;
