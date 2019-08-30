@@ -1,3 +1,8 @@
+<?php 
+    if ($result) {
+        echo "<div class=\"alert alert-info\" role=\"alert\">".$result."</div>";
+    }
+?>
 <h1>Все новости</h1>
 <p><a href="/news/create">Add</a></p>
 <?php foreach ($news as $value) {

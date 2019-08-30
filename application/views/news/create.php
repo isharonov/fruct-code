@@ -1,6 +1,11 @@
+<?php 
+    if ($result) {
+        echo "<div class=\"alert alert-info\" role=\"alert\">".$result."</div>";
+    }
+?>
 <form action="/news/create/" method="post">
-    <input type="text" name="slug" placeholder="slug"><br>
-    <input type="text" name="title" placeholder="Название новости"><br>
-    <textarea name="text" placeholder="Текст новости"></textarea><br>
-    <input type="submit" value="Добавить новость">
+    <input class="form-control input-lg" type="text" name="slug" placeholder="slug"><br>
+    <input class="form-control input-lg" type="text" name="title" placeholder="Название новости"><br>
+    <textarea class="form-control input-lg" name="text" placeholder="Текст новости"></textarea><br>
+    <input class="btn btn-default" type="submit" value="Добавить новость">
 </form>

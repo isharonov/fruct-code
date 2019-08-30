@@ -2,41 +2,40 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed!');
 
-class News extends CI_Controller {
+class News extends MY_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->load->model('news_model');
+        $this->data['result'] = NULL;
     }
 
     public function index() {
-        $data['title'] = "Все новости";
-        $data['news'] = $this->news_model->getNews();
+        $this->data['title'] = "Все новости";
+        $this->data['news'] = $this->news_model->getNews();
 
-        $this->load->view('templates/header', $data);
-        $this->load->view('news/index', $data);
+        $this->load->view('templates/header', $this->data);
+        $this->load->view('news/index', $this->data);
         $this->load->view('templates/footer');
     }
 
     public function view($slug = NULL) {
-        $data['news_item'] = $this->news_model->getNews($slug);
+        $this->data['news_item'] = $this->news_model->getNews($slug);
 
-        if (empty($data['news_item'])) {
+        if (empty($this->data['news_item'])) {
             show_404();
         }
 
-        $data['title'] = $data['news_item']['title'];
-        $data['content'] = $data['news_item']['text'];
+        $this->data['title'] = $this->data['news_item']['title'];
+        $this->data['content'] = $this->data['news_item']['text'];
 
-        $this->load->view('templates/header', $data);
-        $this->load->view('news/view', $data);
+        $this->load->view('templates/header', $this->data);
+        $this->load->view('news/view', $this->data);
         $this->load->view('templates/footer');
     }
 
     public function create() {
 
-        $data['title'] = "Создание новости";
-        $this->load->view('templates/header', $data);
+        $this->data['title'] = "Создание новости";
 
         if ($this->input->post('slug') && $this->input->post('title') && $this->input->post('text')) {
             //Здесь должны быть проверки передаваемых через форму данных.
@@ -46,21 +45,23 @@ class News extends CI_Controller {
             $title = $this->input->post('title');
             $text = $this->input->post('text');
 
-            $data['slug'] = $slug;
+            $this->data['slug'] = $slug;
+            $this->data['result'] = "Ошибка создания ".$title;
             
-            $this->news_model->setNews($slug, $title, $text)
-                ? $this->load->view('news/success', $data)
-                : $this->load->view('errors/error_add_news', $data);
+            if ($this->news_model->setNews($slug, $title, $text)) {
+                $this->data['result'] = $title." добавлена!";
+                $this->data['news'] = $this->news_model->getNews(); //Обновляем массив новостей
+            }
         }
 
-        $this->load->view('news/create');
+        $this->load->view('templates/header', $this->data);
+        $this->load->view('news/create', $this->data);
         $this->load->view('templates/footer');
         
     }
 
     public function edit($slug = NULL) {
-        $data['title'] = "Редактирование новости";
-        $this->load->view('templates/header', $data);
+        $this->data['title'] = "Редактирование новости";
 
         if ($this->input->post('slug') && $this->input->post('title') && $this->input->post('text')) {
             //Здесь должны быть проверки передаваемых через форму данных.
@@ -69,50 +70,55 @@ class News extends CI_Controller {
             $slug = $this->input->post('slug');
             $title = $this->input->post('title');
             $text = $this->input->post('text');
+
+            $this->data['result'] = "Ошибка редактирования ".$title;            
             
             if ($this->news_model->editNews($slug, $title, $text)) {
-                echo "Новость успешно отредактирована!";
-                return;
+                $this->data['result'] = $title." успешно отредактирована!";
             }
+
+            $slug = NULL;
         } 
 
-        if ($slug) {
-            $data['news_item'] = $this->news_model->getNews($slug);
+        $this->load->view('templates/header', $this->data);
 
-            if (empty($data['news_item'])) {
+        if ($slug) {
+            $this->data['news_item'] = $this->news_model->getNews($slug);
+
+            if (empty($this->data['news_item'])) {
                 show_404();
             }
 
-            $data['title_news'] = $data['news_item']['title'];
-            $data['content_news'] = $data['news_item']['text'];
-            $data['slug_news'] = $data['news_item']['slug'];
+            $this->data['title_news'] = $this->data['news_item']['title'];
+            $this->data['content_news'] = $this->data['news_item']['text'];
+            $this->data['slug_news'] = $this->data['news_item']['slug'];
 
-            $this->load->view('news/edit', $data);
+            $this->load->view('news/edit', $this->data);
         } else {
-            $data['news'] = $this->news_model->getNews();
-            $this->load->view('news/index', $data);
+            $this->data['news'] = $this->news_model->getNews();
+            $this->load->view('news/index', $this->data);
         }
         
-
         $this->load->view('templates/footer');
     }
 
     public function delete($slug = NULL) {
-        $data['title'] = "Удаление новости";
-        $data['news'] = $this->news_model->getNews($slug);
+        $this->data['title'] = "Удаление новости";
+        $this->data['news_item'] = $this->news_model->getNews($slug);
 
-        if (empty($data['news'])) {
+        if (empty($this->data['news_item'])) {
             show_404();
         }
 
-        $data['result'] = "Ошибка удаления ".$data['news']['title'];
+        $this->data['result'] = "Ошибка удаления ".$this->data['news_item']['title'];
 
         if ($this->news_model->deleteNews($slug)) {
-            $data['result'] = $data['news']['title']." успешно удалена";
+            $this->data['result'] = $this->data['news_item']['title']." успешно удалена";
+            $this->data['news'] = $this->news_model->getNews();
         }
 
-        $this->load->view('templates/header', $data);
-        $this->load->view('news/delete', $data);
+        $this->load->view('templates/header', $this->data);
+        $this->load->view('news/index', $this->data);
         $this->load->view('templates/footer');
     }
 }
